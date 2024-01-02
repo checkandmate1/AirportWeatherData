@@ -1,4 +1,4 @@
-package weatherdata
+package getweather
 
 import (
 	"encoding/json"
@@ -29,6 +29,8 @@ type MetarData struct {
 	Wgst        *int       `json:"wgst"`
 	Clouds      []CloudData `json:"clouds"`
 }
+
+
 func GetWeather(icao string) (int, int, int) {
 	initColly(icao)
 	return direction, speed, gust2
@@ -88,8 +90,8 @@ func initColly(icao string) (){
 			return
 		}
 
-	
-		fmt.Println("Visiting:", url)
+		printWeatherData(metarData)
+		
 		
 	})
 
@@ -99,26 +101,20 @@ func initColly(icao string) (){
 	}
 }
 
-func printWeatherData(data []MetarData) (int, int, int){
+func printWeatherData(data []MetarData) {
 	for _, metar := range data {
-		fmt.Printf("ICAO ID: %s\n", metar.ICAOID)
-		fmt.Printf("Wdir: %d\n", metar.Wdir)
-		fmt.Printf("Wspd: %d\n", metar.Wspd)
-		if metar.Wgst != nil {
-			fmt.Printf("Wgst: %d\n", *metar.Wgst)
-		} else {
-			fmt.Println("Wgst: N/A")
-		}
+		
 
-		direction := metar.Wdir
-		speed := metar.Wspd
+		direction = metar.Wdir
+		speed = metar.Wspd
 		gust := metar.Wgst
 		
 		if gust == nil {
 			gust2 = 0 
 		}
-		fmt.Println(direction, speed, gust2)
+		
 		
 	}
-	return 0, 0, 0
+	
+	
 }
