@@ -41,7 +41,6 @@ func initColly(icao string) (){
 	url := fmt.Sprintf("https://aviationweather.gov/api/data/metar?ids=%v&format=json", icao)
 	var err error
 
-	// Setup your client however you need it. This is simply an example
 	client := &http.Client{
 		Timeout: 15 * time.Second,
 		Transport: &http.Transport{
