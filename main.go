@@ -10,7 +10,7 @@ import (
 
 	"github.com/caffix/cloudflare-roundtripper/cfrt"
 )
-var direction, speed, gust2 int
+var direction, speed, gust int
 type CloudData struct {
 	Cover string `json:"cover"`
 	Base  int    `json:"base"`
@@ -26,14 +26,13 @@ type MetarData struct {
 	Dewp        float64    `json:"dewp"`
 	Wdir        int        `json:"wdir"`
 	Wspd        int        `json:"wspd"`
-	Wgst        *int       `json:"wgst"`
+	Wgst        int       `json:"wgst"`
 	Clouds      []CloudData `json:"clouds"`
 }
 
-
 func GetWeather(icao string) (int, int, int) {
 	initColly(icao)
-	return direction, speed, gust2
+	return direction, speed, gust
 }
 
 
@@ -41,6 +40,7 @@ func initColly(icao string) (){
 	url := fmt.Sprintf("https://aviationweather.gov/api/data/metar?ids=%v&format=json", icao)
 	var err error
 
+	// Setup your client however you need it. This is simply an example
 	client := &http.Client{
 		Timeout: 15 * time.Second,
 		Transport: &http.Transport{
@@ -103,14 +103,9 @@ func initColly(icao string) (){
 func printWeatherData(data []MetarData) {
 	for _, metar := range data {
 		
-
 		direction = metar.Wdir
 		speed = metar.Wspd
-		gust := metar.Wgst
-		
-		if gust == nil {
-			gust2 = 0 
-		}
+		gust = metar.Wgst
 		
 		
 	}
