@@ -26,37 +26,38 @@ type MetarData struct {
 	Clouds      []CloudData `json:"clouds"`
 }
 
-func GetWeather(icao string) ([]MetarData, bool) {
+
+
+
+func GetWeather(icao string) ([]MetarData, []string) {
 	data, ok := gatherData(icao)
 
 	return data, ok
 }
 
-func gatherData(icao string) ([]MetarData, bool) {
+func gatherData(icao string) ([]MetarData, []string) {
 	url := fmt.Sprintf("https://aviationweather.gov/api/data/metar?ids=%v&format=json", icao)
-	var err error
-	var sucsess bool
+	var erro []string
+	
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Error getting URL ", err)
+		erro = append(erro, fmt.Sprintf("Unable to make the http.Get request for %v", icao))
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading JSON")
+		erro = append(erro, "Unable to read the JSON file for %v airport", icao)
 	}
 	var metarData []MetarData
 	err = json.Unmarshal(body, &metarData)
 	if err != nil {
-		fmt.Printf("Error unmarshalling JSON: %v\n", err)
+		erro = append(erro, "Unable to unmarshall JSON for %v airport", icao)
 	}
 
-	if len(metarData) > 0 {
-		sucsess = true
-	} else {
-		sucsess = false
+	if len(metarData) <= 0 {
+		erro = append(erro, fmt.Sprintf("No METAR availble"))
 	}
-	return metarData, sucsess
+	return metarData, erro
 
 }
