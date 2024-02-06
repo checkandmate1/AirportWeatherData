@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 )
-
 type CloudData struct {
 	Cover string `json:"cover"`
 	Base  int    `json:"base"`
