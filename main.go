@@ -1,4 +1,4 @@
-package getweather
+package main
 
 import (
 	"encoding/json"
@@ -23,10 +23,9 @@ type MetarData struct {
 	Wspd        int         `json:"wspd"`
 	Wgst        int         `json:"wgst"`
 	Altimiter   float32     `json:"altim"`
+	RawMETAR 	string 		`json:"rawOb"`
 	Clouds      []CloudData `json:"clouds"`
 }
-
-
 
 
 func GetWeather(icao string) ([]MetarData, []string) {
