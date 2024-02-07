@@ -3,10 +3,14 @@ package getweather
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"time"
+
+	"github.com/gocolly/colly"
 )
-type CloudData struct {
+
+var c *colly.Collector
+
+type cloudData struct {
 	Cover string `json:"cover"`
 	Base  int    `json:"base"`
 }
@@ -23,40 +27,47 @@ type MetarData struct {
 	Wspd        int         `json:"wspd"`
 	Wgst        int         `json:"wgst"`
 	Altimiter   float32     `json:"altim"`
-	RawMETAR 	string 		`json:"rawOb"`
-	Clouds      []CloudData `json:"clouds"`
+	RawMETAR    string      `json:"rawOb"`
+	Clouds      []cloudData `json:"clouds"`
 }
+
 
 
 func GetWeather(icao string) ([]MetarData, []string) {
 	data, ok := gatherData(icao)
-
+	if len(data) <= 0 {
+		ok = append(ok, "No METAR Availible")
+		fmt.Println(len(data))
+	}
 	return data, ok
 }
 
 func gatherData(icao string) ([]MetarData, []string) {
-	url := fmt.Sprintf("https://aviationweather.gov/api/data/metar?ids=%v&format=json", icao)
 	var erro []string
-	
-	resp, err := http.Get(url)
-	if err != nil {
-		erro = append(erro, fmt.Sprintf("Unable to make the http.Get request for %v", icao))
-	}
+	var data []MetarData
+	url := fmt.Sprintf("https://aviationweather.gov/api/data/metar?ids=%v&format=json", icao)
+	c = colly.NewCollector(
+		colly.Async(true),
+	)
 
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		erro = append(erro, "Unable to read the JSON file for %v airport", icao)
-	}
-	var metarData []MetarData
-	err = json.Unmarshal(body, &metarData)
-	if err != nil {
-		erro = append(erro, "Unable to unmarshall JSON for %v airport", icao)
-	}
+	c.Limit(&colly.LimitRule{
+		Parallelism: 4,
+		RandomDelay: 2 * time.Second,
+	})
 
-	if len(metarData) <= 0 {
-		erro = append(erro, fmt.Sprintf("No METAR availble"))
+	c.OnResponse(func(r *colly.Response) {
+
+		err := json.Unmarshal(r.Body, &data)
+		if err != nil {
+			erro = append(erro, "Error unmarshaling JSON")
+		}
+	})
+
+	err := c.Visit(url)
+	if err != nil {
+		erro = append(erro, "Error visiting the URL")
 	}
-	return metarData, erro
+	c.Wait()
+	return data, erro
 
 }
