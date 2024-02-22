@@ -23,7 +23,7 @@ type MetarData struct {
 	ReportTime  string      `json:"reportTime"`
 	Temp        float64     `json:"temp"`
 	Dewp        float64     `json:"dewp"`
-	Wdir        int         `json:"wdir"`
+	Wdir        interface{} `json:"wdir"`
 	Wspd        int         `json:"wspd"`
 	Wgst        int         `json:"wgst"`
 	Altimiter   float32     `json:"altim"`
@@ -68,6 +68,9 @@ func gatherData(icao string) ([]MetarData, []string) {
 		erro = append(erro, "Error visiting the URL")
 	}
 	c.Wait()
+	if data[0].Wdir == "VRB" {
+		data[0].Wdir = -1
+	}
 	return data, erro
 
 }
