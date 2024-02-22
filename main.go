@@ -59,13 +59,13 @@ func gatherData(icao string) ([]MetarData, []string) {
 
 		err := json.Unmarshal(r.Body, &data)
 		if err != nil {
-			erro = append(erro, "Error unmarshaling JSON")
+			erro = append(erro, fmt.Sprintf("%v", err))
 		}
 	})
 
 	err := c.Visit(url)
 	if err != nil {
-		erro = append(erro, "Error visiting the URL")
+		erro = append(erro, fmt.Sprintf("%v", err))
 	}
 	c.Wait()
 	if data[0].Wdir == "VRB" {
